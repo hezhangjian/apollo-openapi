@@ -1,9 +1,5 @@
-# project-name
+# apollo-openapi
 
-Do whatever you want with this template, typically used to create a new project.
-
-## Variables
-
-> globally replace the following variable(e.g., `git-repo-name`) with your project details using your editor's find-and-replace tool.
-
-- git-repo-name: the Git repository name
+![OpenAPI](https://img.shields.io/badge/spec-OpenAPI%203.1-blue)
+[![npm](https://img.shields.io/npm/v/apollo-openapi?label=npm&color=cb3837&logo=npm)](https://www.npmjs.com/package/apollo-openapi)
+[![PyPI version](https://img.shields.io/pypi/v/apollo-openapi.svg)](https://pypi.org/project/apollo-openapi)
