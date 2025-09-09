@@ -1,0 +1,2499 @@
+openapi: 3.0.1
+info:
+  title: Apollo
+  description: ''
+  version: 1.0.0
+tags: []
+paths:
+  /openapi/v1/apps:
+    post:
+      summary: createApp
+      deprecated: false
+      description: 创建新的Apollo应用，包括应用基本信息设置和管理员权限分配
+      tags: []
+      parameters:
+        - name: Authorization
+          in: header
+          description: ''
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpenCreateAppDTO'
+              description: 创建应用的请求参数，包含应用基本信息和管理员配置
+      responses:
+        '200':
+          description: 操作成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+          headers: {}
+      security: []
+    get:
+      summary: findApps
+      deprecated: false
+      description: 查询应用列表，支持根据应用ID列表进行筛选查询
+      tags: []
+      parameters:
+        - name: appIds
+          in: query
+          description: 应用ID列表，多个ID用逗号分隔，用于批量查询指定的应用信息
+          required: false
+          schema:
+            type: string
+        - name: Authorization
+          in: header
+          description: ''
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 查询成功，返回数据列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OpenAppDTO'
+                  description: com.ctrip.framework.apollo.openapi.dto.OpenAppDTO
+              example:
+                - dataChangeCreatedBy: 'apollo-admin'
+                  dataChangeLastModifiedBy: 'john.doe'
+                  dataChangeCreatedTime: '2024-01-15T10:30:00.000+0800'
+                  dataChangeLastModifiedTime: '2024-01-20T14:25:30.000+0800'
+                  name: '用户管理系统'
+                  appId: 'user-management-service'
+                  orgId: 'tech-dept'
+                  orgName: '技术部'
+                  ownerName: '张三'
+                  ownerEmail: 'zhangsan@company.com'
+                - dataChangeCreatedBy: 'apollo-admin'
+                  dataChangeLastModifiedBy: 'jane.smith'
+                  dataChangeCreatedTime: '2024-01-10T09:15:00.000+0800'
+                  dataChangeLastModifiedTime: '2024-01-18T16:40:15.000+0800'
+                  name: '订单处理系统'
+                  appId: 'order-processing-service'
+                  orgId: 'business-dept'
+                  orgName: '业务部'
+                  ownerName: '李四'
+                  ownerEmail: 'lisi@company.com'
+          headers: {}
+      security: []
+  /openapi/v1/apps/{appId}/envclusters:
+    get:
+      summary: getEnvClusterInfo
+      deprecated: false
+      description: 获取指定应用在各个环境下的集群信息列表
+      tags: []
+      parameters:
+        - name: appId
+          in: path
+          description: 应用唯一标识符，用于标识特定的Apollo应用
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: Authorization
+          in: header
+          description: ''
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 查询成功，返回数据列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OpenEnvClusterDTO'
+                  description: com.ctrip.framework.apollo.openapi.dto.OpenEnvClusterDTO
+              example:
+                - env: 'DEV'
+                  clusters:
+                    - 'default'
+                    - 'beijing'
+                    - 'shanghai'
+                - env: 'TEST'
+                  clusters:
+                    - 'default'
+                    - 'integration-test'
+                - env: 'PRO'
+                  clusters:
+                    - 'default'
+                    - 'cluster-1'
+                    - 'cluster-2'
+          headers: {}
+      security: []
+  /openapi/v1/apps/authorized:
+    get:
+      summary: findAppsAuthorized
+      deprecated: false
+      description: 查询当前Token有权限操作的应用列表
+      tags: []
+      parameters:
+        - name: Authorization
+          in: header
+          description: ''
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 查询成功，返回数据列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OpenAppDTO'
+                  description: com.ctrip.framework.apollo.openapi.dto.OpenAppDTO
+                description: which apps can be operated by open api
+              example:
+                - dataChangeCreatedBy: 'apollo-admin'
+                  dataChangeLastModifiedBy: 'config-manager'
+                  dataChangeCreatedTime: '2024-01-15T10:30:00.000+0800'
+                  dataChangeLastModifiedTime: '2024-01-20T14:25:30.000+0800'
+                  name: '用户管理系统'
+                  appId: 'user-management-service'
+                  orgId: 'tech-dept'
+                  orgName: '技术部'
+                  ownerName: '张三'
+                  ownerEmail: 'zhangsan@company.com'
+                - dataChangeCreatedBy: 'apollo-admin'
+                  dataChangeLastModifiedBy: 'ops-user'
+                  dataChangeCreatedTime: '2024-01-12T11:20:00.000+0800'
+                  dataChangeLastModifiedTime: '2024-01-19T13:15:45.000+0800'
+                  name: '支付网关服务'
+                  appId: 'payment-gateway-service'
+                  orgId: 'finance-dept'
+                  orgName: '财务部'
+                  ownerName: '王五'
+                  ownerEmail: 'wangwu@company.com'
+          headers: {}
+      security: []
+  /openapi/v1/envs/{env}/apps/{appId}/clusters/{clusterName}/namespaces/{namespaceName}/items/{key:.+}:
+    get:
+      summary: getItem
+      deprecated: false
+      description: 获取指定配置项的详细信息
+      tags: []
+      parameters:
+        - name: appId
+          in: path
+          description: 应用唯一标识符，用于标识特定的Apollo应用
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: env
+          in: path
+          description: 环境名称，如DEV、TEST、PRE、PRO等，用于区分不同的部署环境
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: clusterName
+          in: path
+          description: 集群名称，用于标识应用在特定环境下的集群，默认为default
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: namespaceName
+          in: path
+          description: 命名空间名称，用于组织和管理配置项，默认为application
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: key
+          in: path
+          description: 配置项的键名，用于唯一标识一个配置项
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: Authorization
+          in: header
+          description: ''
+          required: false
+          example: ''
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 查询成功，返回详细数据
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpenItemDTO'
+                description: com.ctrip.framework.apollo.openapi.dto.OpenItemDTO
+              example:
+                dataChangeCreatedBy: 'config-admin'
+                dataChangeLastModifiedBy: 'developer'
+                dataChangeCreatedTime: '2024-01-15T10:30:00.000+0800'
+                dataChangeLastModifiedTime: '2024-01-20T14:25:30.000+0800'
+                key: 'database.url'
+                type: 0
+                value: 'jdbc:mysql://localhost:3306/mydb?useSSL=false&serverTimezone=Asia/Shanghai'
+                comment: '数据库连接URL配置，包含SSL和时区设置'
+          headers: {}
+      security: []
+    put:
+      summary: updateItem
+      deprecated: false
+      description: 更新指定配置项的值和属性信息
+      tags: []
+      parameters:
+        - name: appId
+          in: path
+          description: 应用唯一标识符，用于标识特定的Apollo应用
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: env
+          in: path
+          description: 环境名称，如DEV、TEST、PRE、PRO等，用于区分不同的部署环境
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: clusterName
+          in: path
+          description: 集群名称，用于标识应用在特定环境下的集群，默认为default
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: namespaceName
+          in: path
+          description: 命名空间名称，用于组织和管理配置项，默认为application
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: key
+          in: path
+          description: 配置项的键名，用于唯一标识一个配置项
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: createIfNotExists
+          in: query
+          description: 如果配置项不存在是否创建。当设置为true时，请求体中的dataChangeCreatedBy字段变为必填
+          required: true
+          example: 'false'
+          schema:
+            type: boolean
+        - name: Authorization
+          in: header
+          description: ''
+          required: false
+          example: ''
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpenItemDTO'
+              description: 配置项信息，包含键名、值、类型和备注等
+      responses:
+        '200':
+          description: 操作成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+          headers: {}
+      security: []
+    delete:
+      summary: deleteItem
+      deprecated: false
+      description: 删除指定的配置项
+      tags: []
+      parameters:
+        - name: appId
+          in: path
+          description: 应用唯一标识符，用于标识特定的Apollo应用
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: env
+          in: path
+          description: 环境名称，如DEV、TEST、PRE、PRO等，用于区分不同的部署环境
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: clusterName
+          in: path
+          description: 集群名称，用于标识应用在特定环境下的集群，默认为default
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: namespaceName
+          in: path
+          description: 命名空间名称，用于组织和管理配置项，默认为application
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: key
+          in: path
+          description: 配置项的键名，用于唯一标识一个配置项
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: operator
+          in: query
+          description: 执行删除操作的用户名，必须是系统中存在的用户
+          required: true
+          schema:
+            type: string
+        - name: Authorization
+          in: header
+          description: ''
+          required: false
+          example: ''
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 操作成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+          headers: {}
+      security: []
+  /openapi/v1/envs/{env}/apps/{appId}/clusters/{clusterName}/namespaces/{namespaceName}/encodedItems/{key:.+}:
+    get:
+      summary: getItemByEncodedKey
+      deprecated: false
+      description: 通过编码后的键名获取配置项信息
+      tags: []
+      parameters:
+        - name: appId
+          in: path
+          description: 应用唯一标识符，用于标识特定的Apollo应用
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: env
+          in: path
+          description: 环境名称，如DEV、TEST、PRE、PRO等，用于区分不同的部署环境
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: clusterName
+          in: path
+          description: 集群名称，用于标识应用在特定环境下的集群，默认为default
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: namespaceName
+          in: path
+          description: 命名空间名称，用于组织和管理配置项，默认为application
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: key
+          in: path
+          description: 配置项的键名，用于唯一标识一个配置项
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: Authorization
+          in: header
+          description: ''
+          required: false
+          example: ''
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 查询成功，返回详细数据
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpenItemDTO'
+                description: com.ctrip.framework.apollo.openapi.dto.OpenItemDTO
+              example:
+                dataChangeCreatedBy: 'config-admin'
+                dataChangeLastModifiedBy: 'developer'
+                dataChangeCreatedTime: '2024-01-15T10:30:00.000+0800'
+                dataChangeLastModifiedTime: '2024-01-20T14:25:30.000+0800'
+                key: 'redis.cluster.nodes'
+                type: 0
+                value: '192.168.1.10:7000,192.168.1.11:7001,192.168.1.12:7002'
+                comment: 'Redis集群节点配置，用于分布式缓存'
+          headers: {}
+      security: []
+    put:
+      summary: updateItemByEncodedKey
+      deprecated: false
+      description: 通过编码后的键名更新配置项
+      tags: []
+      parameters:
+        - name: appId
+          in: path
+          description: 应用唯一标识符，用于标识特定的Apollo应用
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: env
+          in: path
+          description: 环境名称，如DEV、TEST、PRE、PRO等，用于区分不同的部署环境
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: clusterName
+          in: path
+          description: 集群名称，用于标识应用在特定环境下的集群，默认为default
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: namespaceName
+          in: path
+          description: 命名空间名称，用于组织和管理配置项，默认为application
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: key
+          in: path
+          description: 配置项的键名，用于唯一标识一个配置项
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: createIfNotExists
+          in: query
+          description: 如果配置项不存在是否创建。当设置为true时，请求体中的dataChangeCreatedBy字段变为必填
+          required: true
+          example: 'false'
+          schema:
+            type: boolean
+        - name: Authorization
+          in: header
+          description: ''
+          required: false
+          example: ''
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpenItemDTO'
+              description: 配置项信息，包含键名、值、类型和备注等
+      responses:
+        '200':
+          description: 操作成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+          headers: {}
+      security: []
+    delete:
+      summary: deleteItemByEncodedKey
+      deprecated: false
+      description: 通过编码后的键名删除配置项
+      tags: []
+      parameters:
+        - name: appId
+          in: path
+          description: 应用唯一标识符，用于标识特定的Apollo应用
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: env
+          in: path
+          description: 环境名称，如DEV、TEST、PRE、PRO等，用于区分不同的部署环境
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: clusterName
+          in: path
+          description: 集群名称，用于标识应用在特定环境下的集群，默认为default
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: namespaceName
+          in: path
+          description: 命名空间名称，用于组织和管理配置项，默认为application
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: key
+          in: path
+          description: 配置项的键名，用于唯一标识一个配置项
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: operator
+          in: query
+          description: 执行删除操作的用户名，必须是系统中存在的用户
+          required: true
+          schema:
+            type: string
+        - name: Authorization
+          in: header
+          description: ''
+          required: false
+          example: ''
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 操作成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+          headers: {}
+      security: []
+  /openapi/v1/envs/{env}/apps/{appId}/clusters/{clusterName}/namespaces/{namespaceName}/items:
+    post:
+      summary: createItem
+      deprecated: false
+      description: 在指定命名空间中创建新的配置项
+      tags: []
+      parameters:
+        - name: appId
+          in: path
+          description: 应用唯一标识符，用于标识特定的Apollo应用
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: env
+          in: path
+          description: 环境名称，如DEV、TEST、PRE、PRO等，用于区分不同的部署环境
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: clusterName
+          in: path
+          description: 集群名称，用于标识应用在特定环境下的集群，默认为default
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: namespaceName
+          in: path
+          description: 命名空间名称，用于组织和管理配置项，默认为application
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: Authorization
+          in: header
+          description: ''
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpenItemDTO'
+              description: 配置项信息，包含键名、值、类型和备注等
+      responses:
+        '200':
+          description: 查询成功，返回详细数据
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpenItemDTO'
+                description: com.ctrip.framework.apollo.openapi.dto.OpenItemDTO
+              example:
+                dataChangeCreatedBy: 'config-manager'
+                dataChangeLastModifiedBy: 'config-manager'
+                dataChangeCreatedTime: '2024-01-20T15:30:00.000+0800'
+                dataChangeLastModifiedTime: '2024-01-20T15:30:00.000+0800'
+                key: 'app.log.level'
+                type: 0
+                value: 'INFO'
+                comment: '应用日志级别配置，控制日志输出详细程度'
+          headers: {}
+      security: []
+    get:
+      summary: findItemsByNamespace
+      deprecated: false
+      description: 分页查询指定命名空间下的配置项列表
+      tags: []
+      parameters:
+        - name: appId
+          in: path
+          description: 应用唯一标识符，用于标识特定的Apollo应用
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: env
+          in: path
+          description: 环境名称，如DEV、TEST、PRE、PRO等，用于区分不同的部署环境
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: clusterName
+          in: path
+          description: 集群名称，用于标识应用在特定环境下的集群，默认为default
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: namespaceName
+          in: path
+          description: 命名空间名称，用于组织和管理配置项，默认为application
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: 页码，从0开始，用于分页查询配置项列表
+          required: true
+          example: 0
+          schema:
+            type: integer
+        - name: size
+          in: query
+          description: 每页记录数，用于控制分页查询每页返回的配置项数量，建议值为50
+          required: true
+          example: 50
+          schema:
+            type: integer
+        - name: Authorization
+          in: header
+          description: ''
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 查询成功，返回详细数据
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpenPageDTOOpenItemDTO'
+              example:
+                page: 0
+                size: 50
+                total: 125
+                content:
+                  - dataChangeCreatedBy: 'config-admin'
+                    dataChangeLastModifiedBy: 'developer'
+                    dataChangeCreatedTime: '2024-01-15T10:30:00.000+0800'
+                    dataChangeLastModifiedTime: '2024-01-20T14:25:30.000+0800'
+                    key: 'database.url'
+                    type: 0
+                    value: 'jdbc:mysql://localhost:3306/mydb'
+                    comment: '数据库连接URL配置'
+                  - dataChangeCreatedBy: 'config-admin'
+                    dataChangeLastModifiedBy: 'ops-user'
+                    dataChangeCreatedTime: '2024-01-15T11:15:00.000+0800'
+                    dataChangeLastModifiedTime: '2024-01-19T16:45:20.000+0800'
+                    key: 'redis.host'
+                    type: 0
+                    value: '192.168.1.100'
+                    comment: 'Redis服务器地址配置'
+                  - dataChangeCreatedBy: 'config-manager'
+                    dataChangeLastModifiedBy: 'config-manager'
+                    dataChangeCreatedTime: '2024-01-16T09:20:00.000+0800'
+                    dataChangeLastModifiedTime: '2024-01-16T09:20:00.000+0800'
+                    key: 'app.log.level'
+                    type: 0
+                    value: 'INFO'
+                    comment: '应用日志级别配置'
+          headers: {}
+      security: []
+  /openapi/v1/envs/{env}/apps/{appId}/clusters/{clusterName:.+}:
+    get:
+      summary: getCluster
+      deprecated: false
+      description: 获取指定集群的详细信息
+      tags: []
+      parameters:
+        - name: appId
+          in: path
+          description: 应用唯一标识符，用于标识特定的Apollo应用
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: env
+          in: path
+          description: 环境名称，如DEV、TEST、PRE、PRO等，用于区分不同的部署环境
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: clusterName
+          in: path
+          description: 集群名称，用于标识应用在特定环境下的集群，默认为default
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: Authorization
+          in: header
+          description: ''
+          required: false
+          example: ''
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 查询成功，返回详细数据
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpenClusterDTO'
+                description: com.ctrip.framework.apollo.openapi.dto.OpenClusterDTO
+              example:
+                dataChangeCreatedBy: 'cluster-admin'
+                dataChangeLastModifiedBy: 'ops-user'
+                dataChangeCreatedTime: '2024-01-15T10:30:00.000+0800'
+                dataChangeLastModifiedTime: '2024-01-20T14:25:30.000+0800'
+                name: 'default'
+                appId: 'user-management-service'
+          headers: {}
+      security: []
+  /openapi/v1/envs/{env}/apps/{appId}/clusters:
+    post:
+      summary: createCluster
+      deprecated: false
+      description: 在指定环境下为应用创建新的集群
+      tags: []
+      parameters:
+        - name: appId
+          in: path
+          description: 应用唯一标识符，用于标识特定的Apollo应用
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: env
+          in: path
+          description: 环境名称，如DEV、TEST、PRE、PRO等，用于区分不同的部署环境
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: Authorization
+          in: header
+          description: ''
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpenClusterDTO'
+              description: 集群配置信息，包含集群名称、应用ID和创建者等
+      responses:
+        '200':
+          description: 查询成功，返回详细数据
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpenClusterDTO'
+                description: com.ctrip.framework.apollo.openapi.dto.OpenClusterDTO
+              example:
+                dataChangeCreatedBy: 'cluster-admin'
+                dataChangeLastModifiedBy: 'cluster-admin'
+                dataChangeCreatedTime: '2024-01-20T16:30:00.000+0800'
+                dataChangeLastModifiedTime: '2024-01-20T16:30:00.000+0800'
+                name: 'beijing-cluster'
+                appId: 'user-management-service'
+          headers: {}
+      security: []
+  /openapi/v1/envs/{env}/apps/{appId}/clusters/{clusterName}/namespaces/{namespaceName}/releases:
+    post:
+      summary: createRelease
+      deprecated: false
+      description: 发布指定命名空间的配置变更
+      tags: []
+      parameters:
+        - name: appId
+          in: path
+          description: 应用唯一标识符，用于标识特定的Apollo应用
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: env
+          in: path
+          description: 环境名称，如DEV、TEST、PRE、PRO等，用于区分不同的部署环境
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: clusterName
+          in: path
+          description: 集群名称，用于标识应用在特定环境下的集群，默认为default
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: namespaceName
+          in: path
+          description: 命名空间名称，用于组织和管理配置项，默认为application
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: Authorization
+          in: header
+          description: ''
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NamespaceReleaseDTO'
+              description: 发布配置信息，包含发布标题、发布者和发布备注等
+      responses:
+        '200':
+          description: 查询成功，返回详细数据
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpenReleaseDTO'
+                description: com.ctrip.framework.apollo.openapi.dto.OpenReleaseDTO
+              example:
+                dataChangeCreatedBy: 'release-manager'
+                dataChangeLastModifiedBy: 'release-manager'
+                dataChangeCreatedTime: '2024-01-20T17:30:00.000+0800'
+                dataChangeLastModifiedTime: '2024-01-20T17:30:00.000+0800'
+                id: 12345
+                appId: 'user-management-service'
+                clusterName: 'default'
+                namespaceName: 'application'
+                name: 'Release-20240120-v1.2.0'
+                configurations:
+                  'database.url': 'jdbc:mysql://localhost:3306/mydb'
+                  'redis.host': '192.168.1.100'
+                  'app.log.level': 'INFO'
+                comment: '更新数据库连接配置，修复Redis连接超时问题'
+          headers: {}
+      security: []
+  /openapi/v1/envs/{env}/apps/{appId}/clusters/{clusterName}/namespaces/{namespaceName}/releases/latest:
+    get:
+      summary: loadLatestActiveRelease
+      deprecated: false
+      description: 获取指定命名空间的最新有效发布版本
+      tags: []
+      parameters:
+        - name: appId
+          in: path
+          description: 应用唯一标识符，用于标识特定的Apollo应用
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: env
+          in: path
+          description: 环境名称，如DEV、TEST、PRE、PRO等，用于区分不同的部署环境
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: clusterName
+          in: path
+          description: 集群名称，用于标识应用在特定环境下的集群，默认为default
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: namespaceName
+          in: path
+          description: 命名空间名称，用于组织和管理配置项，默认为application
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: Authorization
+          in: header
+          description: ''
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 查询成功，返回详细数据
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpenReleaseDTO'
+                description: com.ctrip.framework.apollo.openapi.dto.OpenReleaseDTO
+              example:
+                dataChangeCreatedBy: 'release-manager'
+                dataChangeLastModifiedBy: 'ops-admin'
+                dataChangeCreatedTime: '2024-01-20T17:30:00.000+0800'
+                dataChangeLastModifiedTime: '2024-01-20T18:15:25.000+0800'
+                id: 12345
+                appId: 'user-management-service'
+                clusterName: 'default'
+                namespaceName: 'application'
+                name: 'Release-20240120-v1.2.0'
+                configurations:
+                  'database.url': 'jdbc:mysql://localhost:3306/mydb'
+                  'redis.host': '192.168.1.100'
+                  'app.log.level': 'INFO'
+                  'server.port': '8080'
+                comment: '最新生产环境配置发布，包含数据库和缓存配置更新'
+          headers: {}
+      security: []
+  /openapi/v1/envs/{env}/apps/{appId}/clusters/{clusterName}/namespaces/{namespaceName}/branches/{branchName}/merge:
+    post:
+      summary: merge
+      deprecated: false
+      description: 将灰度分支的配置合并到主分支并发布
+      tags: []
+      parameters:
+        - name: appId
+          in: path
+          description: 应用唯一标识符，用于标识特定的Apollo应用
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: env
+          in: path
+          description: 环境名称，如DEV、TEST、PRE、PRO等，用于区分不同的部署环境
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: clusterName
+          in: path
+          description: 集群名称，用于标识应用在特定环境下的集群，默认为default
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: namespaceName
+          in: path
+          description: 命名空间名称，用于组织和管理配置项，默认为application
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: branchName
+          in: path
+          description: 灰度分支名称，用于标识灰度发布的分支
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: deleteBranch
+          in: query
+          description: 合并完成后是否删除灰度分支
+          required: true
+          example: 'true'
+          schema:
+            type: boolean
+        - name: Authorization
+          in: header
+          description: ''
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NamespaceReleaseDTO'
+              description: 发布配置信息，包含发布标题、发布者和发布备注等
+      responses:
+        '200':
+          description: 查询成功，返回详细数据
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpenReleaseDTO'
+                description: com.ctrip.framework.apollo.openapi.dto.OpenReleaseDTO
+              example:
+                dataChangeCreatedBy: ''
+                dataChangeLastModifiedBy: ''
+                dataChangeCreatedTime: ''
+                dataChangeLastModifiedTime: ''
+                id: 0
+                appId: ''
+                clusterName: ''
+                namespaceName: ''
+                name: ''
+                configurations:
+                  '': ''
+                comment: ''
+          headers: {}
+      security: []
+  /openapi/v1/envs/{env}/apps/{appId}/clusters/{clusterName}/namespaces/{namespaceName}/branches/{branchName}/releases:
+    post:
+      summary: createGrayRelease
+      deprecated: false
+      description: 创建灰度发布，将分支配置发布给特定用户群体
+      tags: []
+      parameters:
+        - name: appId
+          in: path
+          description: 应用唯一标识符，用于标识特定的Apollo应用
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: env
+          in: path
+          description: 环境名称，如DEV、TEST、PRE、PRO等，用于区分不同的部署环境
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: clusterName
+          in: path
+          description: 集群名称，用于标识应用在特定环境下的集群，默认为default
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: namespaceName
+          in: path
+          description: 命名空间名称，用于组织和管理配置项，默认为application
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: branchName
+          in: path
+          description: 灰度分支名称，用于标识灰度发布的分支
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: Authorization
+          in: header
+          description: ''
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NamespaceReleaseDTO'
+              description: 发布配置信息，包含发布标题、发布者和发布备注等
+      responses:
+        '200':
+          description: 查询成功，返回详细数据
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpenReleaseDTO'
+                description: com.ctrip.framework.apollo.openapi.dto.OpenReleaseDTO
+              example:
+                dataChangeCreatedBy: ''
+                dataChangeLastModifiedBy: ''
+                dataChangeCreatedTime: ''
+                dataChangeLastModifiedTime: ''
+                id: 0
+                appId: ''
+                clusterName: ''
+                namespaceName: ''
+                name: ''
+                configurations:
+                  '': ''
+                comment: ''
+          headers: {}
+      security: []
+  /openapi/v1/envs/{env}/apps/{appId}/clusters/{clusterName}/namespaces/{namespaceName}/branches/{branchName}/gray-del-releases:
+    post:
+      summary: createGrayDelRelease
+      deprecated: false
+      description: 创建灰度删除发布，删除指定的配置项并发布给特定用户群体
+      tags: []
+      parameters:
+        - name: appId
+          in: path
+          description: 应用唯一标识符，用于标识特定的Apollo应用
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: env
+          in: path
+          description: 环境名称，如DEV、TEST、PRE、PRO等，用于区分不同的部署环境
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: clusterName
+          in: path
+          description: 集群名称，用于标识应用在特定环境下的集群，默认为default
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: namespaceName
+          in: path
+          description: 命名空间名称，用于组织和管理配置项，默认为application
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: branchName
+          in: path
+          description: 灰度分支名称，用于标识灰度发布的分支
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: Authorization
+          in: header
+          description: ''
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NamespaceGrayDelReleaseDTO'
+              description: 灰度删除发布配置信息，包含要删除的配置项键名列表
+      responses:
+        '200':
+          description: 查询成功，返回详细数据
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpenReleaseDTO'
+                description: com.ctrip.framework.apollo.openapi.dto.OpenReleaseDTO
+              example:
+                dataChangeCreatedBy: ''
+                dataChangeLastModifiedBy: ''
+                dataChangeCreatedTime: ''
+                dataChangeLastModifiedTime: ''
+                id: 0
+                appId: ''
+                clusterName: ''
+                namespaceName: ''
+                name: ''
+                configurations:
+                  '': ''
+                comment: ''
+          headers: {}
+      security: []
+  /openapi/v1/envs/{env}/releases/{releaseId}/rollback:
+    put:
+      summary: rollback
+      deprecated: false
+      description: 回滚到指定的发布版本
+      tags: []
+      parameters:
+        - name: env
+          in: path
+          description: 环境名称，如DEV、TEST、PRE、PRO等，用于区分不同的部署环境
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: releaseId
+          in: path
+          description: 发布记录的唯一标识符，用于标识特定的配置发布版本
+          required: true
+          example: 0
+          schema:
+            type: integer
+        - name: operator
+          in: query
+          description: 执行删除操作的用户名，必须是系统中存在的用户
+          required: true
+          schema:
+            type: string
+        - name: Authorization
+          in: header
+          description: ''
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 操作成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+          headers: {}
+      security: []
+  /openapi/v1/envs/{env}/apps/{appId}/clusters/{clusterName}/namespaces/{namespaceName}/instances:
+    get:
+      summary: getInstanceCountByNamespace
+      deprecated: false
+      description: 获取指定命名空间的客户端实例数量
+      tags: []
+      parameters:
+        - name: appId
+          in: path
+          description: 应用唯一标识符，用于标识特定的Apollo应用
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: env
+          in: path
+          description: 环境名称，如DEV、TEST、PRE、PRO等，用于区分不同的部署环境
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: clusterName
+          in: path
+          description: 集群名称，用于标识应用在特定环境下的集群，默认为default
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: namespaceName
+          in: path
+          description: 命名空间名称，用于组织和管理配置项，默认为application
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: Authorization
+          in: header
+          description: ''
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 查询成功，返回统计数据
+          content:
+            application/json:
+              schema:
+                type: integer
+              example: 15
+          headers: {}
+      security: []
+  /openapi/v1/apps/{appId}/appnamespaces:
+    post:
+      summary: createNamespace
+      deprecated: false
+      description: 为指定应用创建新的命名空间
+      tags: []
+      parameters:
+        - name: appId
+          in: path
+          description: 应用唯一标识符，用于标识特定的Apollo应用
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: Authorization
+          in: header
+          description: ''
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpenAppNamespaceDTO'
+              description: 应用命名空间配置信息，包含命名空间名称、格式类型等
+      responses:
+        '200':
+          description: 查询成功，返回详细数据
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpenAppNamespaceDTO'
+                description: com.ctrip.framework.apollo.openapi.dto.OpenAppNamespaceDTO
+              example:
+                dataChangeCreatedBy: 'namespace-admin'
+                dataChangeLastModifiedBy: 'namespace-admin'
+                dataChangeCreatedTime: '2024-01-20T18:30:00.000+0800'
+                dataChangeLastModifiedTime: '2024-01-20T18:30:00.000+0800'
+                name: 'database-config'
+                appId: 'user-management-service'
+                format: 'properties'
+                isPublic: false
+                appendNamespacePrefix: true
+                comment: '数据库相关配置命名空间，包含数据库连接、连接池等配置'
+          headers: {}
+      security: []
+  /openapi/v1/envs/{env}/apps/{appId}/clusters/{clusterName}/namespaces:
+    get:
+      summary: findNamespaces
+      deprecated: false
+      description: 查询指定集群下的所有命名空间列表
+      tags: []
+      parameters:
+        - name: appId
+          in: path
+          description: 应用唯一标识符，用于标识特定的Apollo应用
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: env
+          in: path
+          description: 环境名称，如DEV、TEST、PRE、PRO等，用于区分不同的部署环境
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: clusterName
+          in: path
+          description: 集群名称，用于标识应用在特定环境下的集群，默认为default
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: fillItemDetail
+          in: query
+          description: 是否填充配置项详细信息，true表示返回配置项列表，false表示只返回命名空间基本信息
+          required: true
+          example: 'true'
+          schema:
+            type: boolean
+        - name: Authorization
+          in: header
+          description: ''
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 查询成功，返回数据列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OpenNamespaceDTO'
+                  description: com.ctrip.framework.apollo.openapi.dto.OpenNamespaceDTO
+              example:
+                - dataChangeCreatedBy: 'namespace-creator'
+                  dataChangeLastModifiedBy: 'config-editor'
+                  dataChangeCreatedTime: '2024-01-15T10:30:00.000+0800'
+                  dataChangeLastModifiedTime: '2024-01-20T14:25:30.000+0800'
+                  appId: 'user-management-service'
+                  clusterName: 'default'
+                  namespaceName: 'application'
+                  comment: '应用主配置命名空间，包含核心业务配置'
+                  format: 'properties'
+                  isPublic: false
+                  items:
+                    - dataChangeCreatedBy: 'config-admin'
+                      dataChangeLastModifiedBy: 'developer'
+                      dataChangeCreatedTime: '2024-01-15T10:30:00.000+0800'
+                      dataChangeLastModifiedTime: '2024-01-20T14:25:30.000+0800'
+                      key: 'database.url'
+                      type: 0
+                      value: 'jdbc:mysql://localhost:3306/mydb'
+                      comment: '数据库连接URL配置'
+                - dataChangeCreatedBy: 'namespace-creator'
+                  dataChangeLastModifiedBy: 'config-manager'
+                  dataChangeCreatedTime: '2024-01-16T09:20:00.000+0800'
+                  dataChangeLastModifiedTime: '2024-01-18T15:30:10.000+0800'
+                  appId: 'user-management-service'
+                  clusterName: 'default'
+                  namespaceName: 'database-config'
+                  comment: '数据库专用配置命名空间'
+                  format: 'properties'
+                  isPublic: false
+                  items:
+                    - dataChangeCreatedBy: 'dba-admin'
+                      dataChangeLastModifiedBy: 'dba-admin'
+                      dataChangeCreatedTime: '2024-01-16T09:25:00.000+0800'
+                      dataChangeLastModifiedTime: '2024-01-18T15:30:10.000+0800'
+                      key: 'connection.pool.size'
+                      type: 0
+                      value: '20'
+                      comment: '数据库连接池大小配置'
+          headers: {}
+      security: []
+  /openapi/v1/envs/{env}/apps/{appId}/clusters/{clusterName}/namespaces/{namespaceName:.+}:
+    get:
+      summary: loadNamespace
+      deprecated: false
+      description: 获取指定命名空间的详细信息和配置项
+      tags: []
+      parameters:
+        - name: appId
+          in: path
+          description: 应用唯一标识符，用于标识特定的Apollo应用
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: env
+          in: path
+          description: 环境名称，如DEV、TEST、PRE、PRO等，用于区分不同的部署环境
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: clusterName
+          in: path
+          description: 集群名称，用于标识应用在特定环境下的集群，默认为default
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: namespaceName
+          in: path
+          description: 命名空间名称，用于组织和管理配置项，默认为application
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: fillItemDetail
+          in: query
+          description: 是否填充配置项详细信息，true表示返回配置项列表，false表示只返回命名空间基本信息
+          required: true
+          example: 'true'
+          schema:
+            type: boolean
+        - name: Authorization
+          in: header
+          description: ''
+          required: false
+          example: ''
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 查询成功，返回详细数据
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpenNamespaceDTO'
+                description: com.ctrip.framework.apollo.openapi.dto.OpenNamespaceDTO
+              example:
+                dataChangeCreatedBy: ''
+                dataChangeLastModifiedBy: ''
+                dataChangeCreatedTime: ''
+                dataChangeLastModifiedTime: ''
+                appId: ''
+                clusterName: ''
+                namespaceName: ''
+                comment: ''
+                format: ''
+                isPublic: false
+                items:
+                  - dataChangeCreatedBy: ''
+                    dataChangeLastModifiedBy: ''
+                    dataChangeCreatedTime: ''
+                    dataChangeLastModifiedTime: ''
+                    key: ''
+                    type: 0
+                    value: ''
+                    comment: ''
+          headers: {}
+      security: []
+  /openapi/v1/envs/{env}/apps/{appId}/clusters/{clusterName}/namespaces/{namespaceName}/lock:
+    get:
+      summary: getNamespaceLock
+      deprecated: false
+      description: 获取指定命名空间的锁定状态信息
+      tags: []
+      parameters:
+        - name: appId
+          in: path
+          description: 应用唯一标识符，用于标识特定的Apollo应用
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: env
+          in: path
+          description: 环境名称，如DEV、TEST、PRE、PRO等，用于区分不同的部署环境
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: clusterName
+          in: path
+          description: 集群名称，用于标识应用在特定环境下的集群，默认为default
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: namespaceName
+          in: path
+          description: 命名空间名称，用于组织和管理配置项，默认为application
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: Authorization
+          in: header
+          description: ''
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 查询成功，返回详细数据
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpenNamespaceLockDTO'
+                description: com.ctrip.framework.apollo.openapi.dto.OpenNamespaceLockDTO
+              example:
+                namespaceName: 'application'
+                isLocked: true
+                lockedBy: 'config-admin'
+          headers: {}
+      security: []
+  /openapi/v1/organizations:
+    get:
+      summary: getOrganization
+      deprecated: false
+      description: 获取系统中所有组织的列表信息
+      tags: []
+      parameters:
+        - name: Authorization
+          in: header
+          description: ''
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 查询成功，返回数据列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OpenOrganizationDto'
+                  description: com.ctrip.framework.apollo.openapi.dto.OpenOrganizationDto
+              example:
+                - orgId: 'tech-dept'
+                  orgName: '技术部'
+                - orgId: 'business-dept'
+                  orgName: '业务部'
+                - orgId: 'finance-dept'
+                  orgName: '财务部'
+                - orgId: 'ops-dept'
+                  orgName: '运维部'
+          headers: {}
+      security: []
+  /openapi/v1/envs/{env}/apps/{appId}/clusters/{clusterName}/namespaces/{namespaceName}/branches:
+    get:
+      summary: findBranch
+      deprecated: false
+      description: 查找指定命名空间的灰度分支信息
+      tags: []
+      parameters:
+        - name: appId
+          in: path
+          description: 应用唯一标识符，用于标识特定的Apollo应用
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: env
+          in: path
+          description: 环境名称，如DEV、TEST、PRE、PRO等，用于区分不同的部署环境
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: clusterName
+          in: path
+          description: 集群名称，用于标识应用在特定环境下的集群，默认为default
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: namespaceName
+          in: path
+          description: 命名空间名称，用于组织和管理配置项，默认为application
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: Authorization
+          in: header
+          description: ''
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 查询成功，返回详细数据
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpenNamespaceDTO'
+                description: com.ctrip.framework.apollo.openapi.dto.OpenNamespaceDTO
+              example:
+                dataChangeCreatedBy: 'gray-release-admin'
+                dataChangeLastModifiedBy: 'config-editor'
+                dataChangeCreatedTime: '2024-01-20T19:00:00.000+0800'
+                dataChangeLastModifiedTime: '2024-01-20T20:15:30.000+0800'
+                appId: 'user-management-service'
+                clusterName: 'gray-branch-20240120'
+                namespaceName: 'application'
+                comment: '灰度发布分支，用于测试新配置'
+                format: 'properties'
+                isPublic: false
+                items:
+                  - dataChangeCreatedBy: 'gray-release-admin'
+                    dataChangeLastModifiedBy: 'config-editor'
+                    dataChangeCreatedTime: '2024-01-20T19:05:00.000+0800'
+                    dataChangeLastModifiedTime: '2024-01-20T20:15:30.000+0800'
+                    key: 'feature.new-algorithm.enabled'
+                    type: 0
+                    value: 'true'
+                    comment: '新算法功能开关，灰度测试用'
+                  - dataChangeCreatedBy: 'gray-release-admin'
+                    dataChangeLastModifiedBy: 'gray-release-admin'
+                    dataChangeCreatedTime: '2024-01-20T19:10:00.000+0800'
+                    dataChangeLastModifiedTime: '2024-01-20T19:10:00.000+0800'
+                    key: 'cache.timeout'
+                    type: 0
+                    value: '300'
+                    comment: '缓存超时时间，灰度环境专用配置'
+          headers: {}
+      security: []
+    post:
+      summary: createBranch
+      deprecated: false
+      description: 为指定命名空间创建灰度发布分支
+      tags: []
+      parameters:
+        - name: appId
+          in: path
+          description: 应用唯一标识符，用于标识特定的Apollo应用
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: env
+          in: path
+          description: 环境名称，如DEV、TEST、PRE、PRO等，用于区分不同的部署环境
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: clusterName
+          in: path
+          description: 集群名称，用于标识应用在特定环境下的集群，默认为default
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: namespaceName
+          in: path
+          description: 命名空间名称，用于组织和管理配置项，默认为application
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: operator
+          in: query
+          description: 执行删除操作的用户名，必须是系统中存在的用户
+          required: true
+          schema:
+            type: string
+        - name: Authorization
+          in: header
+          description: ''
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 查询成功，返回详细数据
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpenNamespaceDTO'
+                description: com.ctrip.framework.apollo.openapi.dto.OpenNamespaceDTO
+              example:
+                dataChangeCreatedBy: ''
+                dataChangeLastModifiedBy: ''
+                dataChangeCreatedTime: ''
+                dataChangeLastModifiedTime: ''
+                appId: ''
+                clusterName: ''
+                namespaceName: ''
+                comment: ''
+                format: ''
+                isPublic: false
+                items:
+                  - dataChangeCreatedBy: ''
+                    dataChangeLastModifiedBy: ''
+                    dataChangeCreatedTime: ''
+                    dataChangeLastModifiedTime: ''
+                    key: ''
+                    type: 0
+                    value: ''
+                    comment: ''
+          headers: {}
+      security: []
+  /openapi/v1/envs/{env}/apps/{appId}/clusters/{clusterName}/namespaces/{namespaceName}/branches/{branchName}:
+    delete:
+      summary: deleteBranch
+      deprecated: false
+      description: 删除指定的灰度发布分支
+      tags: []
+      parameters:
+        - name: appId
+          in: path
+          description: 应用唯一标识符，用于标识特定的Apollo应用
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: env
+          in: path
+          description: 环境名称，如DEV、TEST、PRE、PRO等，用于区分不同的部署环境
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: clusterName
+          in: path
+          description: 集群名称，用于标识应用在特定环境下的集群，默认为default
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: namespaceName
+          in: path
+          description: 命名空间名称，用于组织和管理配置项，默认为application
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: branchName
+          in: path
+          description: 灰度分支名称，用于标识灰度发布的分支
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: operator
+          in: query
+          description: 执行删除操作的用户名，必须是系统中存在的用户
+          required: true
+          schema:
+            type: string
+        - name: Authorization
+          in: header
+          description: ''
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 操作成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+          headers: {}
+      security: []
+  /openapi/v1/envs/{env}/apps/{appId}/clusters/{clusterName}/namespaces/{namespaceName}/branches/{branchName}/rules:
+    get:
+      summary: getBranchGrayRules
+      deprecated: false
+      description: 获取灰度分支的发布规则配置
+      tags: []
+      parameters:
+        - name: appId
+          in: path
+          description: 应用唯一标识符，用于标识特定的Apollo应用
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: env
+          in: path
+          description: 环境名称，如DEV、TEST、PRE、PRO等，用于区分不同的部署环境
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: clusterName
+          in: path
+          description: 集群名称，用于标识应用在特定环境下的集群，默认为default
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: namespaceName
+          in: path
+          description: 命名空间名称，用于组织和管理配置项，默认为application
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: branchName
+          in: path
+          description: 灰度分支名称，用于标识灰度发布的分支
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: Authorization
+          in: header
+          description: ''
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 查询成功，返回详细数据
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpenGrayReleaseRuleDTO'
+                description: com.ctrip.framework.apollo.openapi.dto.OpenGrayReleaseRuleDTO
+              example:
+                dataChangeCreatedBy: 'gray-release-admin'
+                dataChangeLastModifiedBy: 'ops-manager'
+                dataChangeCreatedTime: '2024-01-20T19:30:00.000+0800'
+                dataChangeLastModifiedTime: '2024-01-20T20:45:15.000+0800'
+                appId: 'user-management-service'
+                clusterName: 'default'
+                namespaceName: 'application'
+                branchName: 'gray-branch-20240120'
+                ruleItems:
+                  - clientAppId: 'mobile-app'
+                    clientIpList:
+                      - '192.168.1.100'
+                      - '192.168.1.101'
+                      - '10.0.0.50'
+                    clientLabelList:
+                      - 'beta-user'
+                      - 'internal-test'
+                  - clientAppId: 'web-frontend'
+                    clientIpList:
+                      - '192.168.2.10'
+                      - '192.168.2.11'
+                    clientLabelList:
+                      - 'canary-group'
+                      - 'qa-team'
+          headers: {}
+      security: []
+    put:
+      summary: updateBranchRules
+      deprecated: false
+      description: 更新灰度分支的发布规则配置
+      tags: []
+      parameters:
+        - name: appId
+          in: path
+          description: 应用唯一标识符，用于标识特定的Apollo应用
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: env
+          in: path
+          description: 环境名称，如DEV、TEST、PRE、PRO等，用于区分不同的部署环境
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: clusterName
+          in: path
+          description: 集群名称，用于标识应用在特定环境下的集群，默认为default
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: namespaceName
+          in: path
+          description: 命名空间名称，用于组织和管理配置项，默认为application
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: branchName
+          in: path
+          description: 灰度分支名称，用于标识灰度发布的分支
+          required: true
+          example: ''
+          schema:
+            type: string
+        - name: operator
+          in: query
+          description: 执行删除操作的用户名，必须是系统中存在的用户
+          required: true
+          schema:
+            type: string
+        - name: Authorization
+          in: header
+          description: ''
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpenGrayReleaseRuleDTO'
+              description: 灰度发布规则配置，包含灰度规则项列表和生效条件
+      responses:
+        '200':
+          description: 操作成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+          headers: {}
+      security: []
+components:
+  schemas:
+    OpenAppDTO:
+      type: object
+      description: Apollo应用信息数据传输对象，包含应用的基本信息和元数据
+      required:
+        - appId
+        - name
+        - ownerName
+        - ownerEmail
+      properties:
+        dataChangeCreatedBy:
+          type: string
+          description: 数据创建者用户名，记录是谁创建了这个应用
+          example: apollo-admin
+        dataChangeLastModifiedBy:
+          type: string
+          description: 数据最后修改者用户名，记录最后一次修改应用信息的用户
+          example: john.doe
+        dataChangeCreatedTime:
+          type: string
+          description: 数据创建时间，ISO 8601格式的时间戳
+          example: 2024-01-15T10:30:00.000+0800
+        dataChangeLastModifiedTime:
+          type: string
+          description: 数据最后修改时间，ISO 8601格式的时间戳
+          example: 2024-01-20T14:25:30.000+0800
+        name:
+          type: string
+          description: 应用名称，用于显示的友好名称
+          example: 用户管理系统
+        appId:
+          type: string
+          description: 应用唯一标识符，全局唯一的应用ID
+          example: user-management-service
+        orgId:
+          type: string
+          description: 组织ID，应用所属组织的唯一标识
+          example: tech-dept
+        orgName:
+          type: string
+          description: 组织名称，应用所属组织的显示名称
+          example: 技术部
+        ownerName:
+          type: string
+          description: 应用负责人姓名，应用的主要负责人
+          example: 张三
+        ownerEmail:
+          type: string
+          description: 应用负责人邮箱地址，用于接收应用相关通知
+          example: zhangsan@company.com
+    OpenCreateAppDTO:
+      type: object
+      description: 创建Apollo应用的请求数据传输对象，包含创建应用所需的所有信息
+      required:
+        - app
+      properties:
+        assignAppRoleToSelf:
+          type: boolean
+          description: 是否将应用角色分配给当前用户。当设置为true时，当前token用户将获得该应用的完全操作权限
+          example: true
+        admins:
+          type: array
+          items:
+            type: string
+          description: 应用管理员用户名列表。应用负责人默认具有项目管理员权限。管理员可以创建命名空间、集群并分配用户权限
+          example:
+            - admin
+            - john.doe
+            - jane.smith
+        app:
+          $ref: '#/components/schemas/OpenAppDTO'
+          description: 应用基本信息，包含应用的详细配置数据
+    OpenEnvClusterDTO:
+      type: object
+      description: 环境集群信息数据传输对象，表示特定环境下的集群列表
+      required:
+        - env
+        - clusters
+      properties:
+        env:
+          type: string
+          description: 环境名称，如开发环境、测试环境、生产环境等
+          example: DEV
+        clusters:
+          type: array
+          items:
+            type: string
+          description: 该环境下的集群名称列表，每个集群代表一个部署单元
+          example:
+            - default
+            - cluster-1
+            - cluster-2
+    OpenItemDTO:
+      type: object
+      description: Apollo配置项数据传输对象，表示一个具体的配置键值对及其元数据
+      required:
+        - key
+        - value
+      properties:
+        dataChangeCreatedBy:
+          type: string
+          description: 配置项创建者用户名，记录是谁创建了这个配置项
+          example: config-admin
+        dataChangeLastModifiedBy:
+          type: string
+          description: 配置项最后修改者用户名，记录最后一次修改配置的用户
+          example: developer
+        dataChangeCreatedTime:
+          type: string
+          description: 配置项创建时间，ISO 8601格式的时间戳
+          example: 2024-01-15T10:30:00.000+0800
+        dataChangeLastModifiedTime:
+          type: string
+          description: 配置项最后修改时间，ISO 8601格式的时间戳
+          example: 2024-01-20T14:25:30.000+0800
+        key:
+          type: string
+          description: 配置项的键名，在同一命名空间内唯一标识一个配置项
+          example: database.url
+        type:
+          type: integer
+          description: 配置项类型，0表示普通配置项，1表示文件类型配置项
+          example: 0
+        value:
+          type: string
+          description: 配置项的值，可以是字符串、数字、JSON等格式
+          example: jdbc:mysql://localhost:3306/mydb
+        comment:
+          type: string
+          description: 配置项的注释说明，用于描述配置项的用途和含义
+          example: 数据库连接URL配置
+    OpenPageDTOOpenItemDTO:
+      type: object
+      description: 分页配置项数据传输对象，用于返回分页查询的配置项列表结果
+      properties:
+        page:
+          type: integer
+          description: 当前页码，从0开始计数
+          example: 0
+        size:
+          type: integer
+          description: 每页显示的记录数量
+          example: 20
+        total:
+          type: integer
+          description: 总记录数，符合查询条件的配置项总数量
+          format: int64
+          example: 150
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/OpenItemDTO'
+            description: com.ctrip.framework.apollo.openapi.dto.OpenItemDTO
+          description: 当前页的配置项列表，包含具体的配置项数据
+    OpenClusterDTO:
+      type: object
+      description: Apollo集群信息数据传输对象，表示应用在特定环境下的集群配置
+      required:
+        - name
+        - appId
+        - dataChangeCreatedBy
+      properties:
+        dataChangeCreatedBy:
+          type: string
+          description: 集群创建者用户名，记录是谁创建了这个集群
+          example: cluster-admin
+        dataChangeLastModifiedBy:
+          type: string
+          description: 集群最后修改者用户名，记录最后一次修改集群信息的用户
+          example: ops-user
+        dataChangeCreatedTime:
+          type: string
+          description: 集群创建时间，ISO 8601格式的时间戳
+          example: 2024-01-15T10:30:00.000+0800
+        dataChangeLastModifiedTime:
+          type: string
+          description: 集群最后修改时间，ISO 8601格式的时间戳
+          example: 2024-01-20T14:25:30.000+0800
+        name:
+          type: string
+          description: 集群名称，在同一应用和环境下唯一标识一个集群
+          example: default
+        appId:
+          type: string
+          description: 所属应用的唯一标识符
+          example: user-management-service
+    MapString:
+      type: object
+      description: 字符串映射对象，用于表示键值对的配置数据结构
+      additionalProperties:
+        type: string
+        description: 配置项的值，键为配置项名称，值为配置项内容
+        example: configuration-value
+      properties: {}
+      example:
+        database.url: jdbc:mysql://localhost:3306/mydb
+        redis.host: localhost
+        app.name: MyApplication
+    OpenReleaseDTO:
+      type: object
+      description: Apollo发布信息数据传输对象，表示一次配置发布的完整信息
+      properties:
+        dataChangeCreatedBy:
+          type: string
+          description: 发布创建者用户名，记录是谁创建了这次发布
+          example: release-manager
+        dataChangeLastModifiedBy:
+          type: string
+          description: 发布最后修改者用户名，记录最后一次修改发布信息的用户
+          example: ops-admin
+        dataChangeCreatedTime:
+          type: string
+          description: 发布创建时间，ISO 8601格式的时间戳
+          example: 2024-01-15T10:30:00.000+0800
+        dataChangeLastModifiedTime:
+          type: string
+          description: 发布最后修改时间，ISO 8601格式的时间戳
+          example: 2024-01-20T14:25:30.000+0800
+        id:
+          type: integer
+          description: 发布记录的唯一标识符，系统自动生成
+          format: int64
+          example: 12345
+        appId:
+          type: string
+          description: 所属应用的唯一标识符
+          example: user-management-service
+        clusterName:
+          type: string
+          description: 所属集群的名称
+          example: default
+        namespaceName:
+          type: string
+          description: 所属命名空间的名称
+          example: application
+        name:
+          type: string
+          description: 发布名称，用于标识这次发布的版本或描述
+          example: Release-20240120-v1.2.0
+        configurations:
+          $ref: '#/components/schemas/MapString'
+          description: 本次发布包含的所有配置项键值对
+        comment:
+          type: string
+          description: 发布备注，描述本次发布的变更内容和目的
+          example: 更新数据库连接配置，修复Redis连接超时问题
+    NamespaceReleaseDTO:
+      type: object
+      description: 命名空间发布请求数据传输对象，用于创建新的配置发布
+      required:
+        - releaseTitle
+        - releasedBy
+      properties:
+        releaseTitle:
+          type: string
+          description: 发布标题，用于标识这次发布的名称或版本号
+          example: Release-20240120-v1.2.0
+        releaseComment:
+          type: string
+          description: 发布备注，详细描述本次发布的变更内容和目的
+          example: 更新数据库连接配置，修复Redis连接超时问题，新增日志级别配置
+        releasedBy:
+          type: string
+          description: 发布操作者用户名，记录是谁执行了这次发布操作
+          example: release-manager
+        isEmergencyPublish:
+          type: boolean
+          description: 是否为紧急发布，紧急发布可能会跳过某些审核流程
+          example: false
+    NamespaceGrayDelReleaseDTO:
+      type: object
+      description: 命名空间灰度删除发布请求数据传输对象，用于创建删除特定配置项的灰度发布
+      required:
+        - releaseTitle
+        - releasedBy
+        - grayDelKeys
+      properties:
+        releaseTitle:
+          type: string
+          description: 发布标题，用于标识这次灰度删除发布的名称或版本号
+          example: GrayDel-20240120-remove-deprecated-configs
+        releaseComment:
+          type: string
+          description: 发布备注，详细描述本次灰度删除发布的目的和删除的配置项
+          example: 删除已废弃的旧版本数据库配置项，清理无用的缓存配置
+        releasedBy:
+          type: string
+          description: 发布操作者用户名，记录是谁执行了这次灰度删除发布操作
+          example: config-manager
+        isEmergencyPublish:
+          type: boolean
+          description: 是否为紧急发布，紧急发布可能会跳过某些审核流程
+          example: false
+        grayDelKeys:
+          type: array
+          items:
+            type: string
+          description: 需要在灰度发布中删除的配置项键名列表
+          example:
+            - old.database.host
+            - deprecated.cache.config
+            - legacy.api.endpoint
+    OpenAppNamespaceDTO:
+      type: object
+      description: Apollo应用命名空间数据传输对象，表示应用级别的命名空间配置信息
+      required:
+        - name
+        - appId
+        - format
+        - dataChangeCreatedBy
+      properties:
+        dataChangeCreatedBy:
+          type: string
+          description: 命名空间创建者用户名，记录是谁创建了这个应用命名空间
+          example: namespace-admin
+        dataChangeLastModifiedBy:
+          type: string
+          description: 命名空间最后修改者用户名，记录最后一次修改命名空间信息的用户
+          example: config-manager
+        dataChangeCreatedTime:
+          type: string
+          description: 命名空间创建时间，ISO 8601格式的时间戳
+          example: 2024-01-15T10:30:00.000+0800
+        dataChangeLastModifiedTime:
+          type: string
+          description: 命名空间最后修改时间，ISO 8601格式的时间戳
+          example: 2024-01-20T14:25:30.000+0800
+        name:
+          type: string
+          description: 命名空间名称，在同一应用内唯一标识一个命名空间
+          example: database-config
+        appId:
+          type: string
+          description: 所属应用的唯一标识符
+          example: user-management-service
+        format:
+          type: string
+          description: 命名空间格式类型，如properties、xml、json、yml等
+          example: properties
+        isPublic:
+          type: boolean
+          description: 是否为公共命名空间，公共命名空间可以被其他应用关联使用
+          example: false
+        appendNamespacePrefix:
+          type: boolean
+          description: 对于公共命名空间，是否在命名空间名称前添加前缀
+          default: true
+          example: true
+        comment:
+          type: string
+          description: 命名空间备注说明，描述命名空间的用途和包含的配置类型
+          example: 数据库相关配置命名空间，包含数据库连接、连接池等配置
+    OpenNamespaceDTO:
+      type: object
+      description: Apollo命名空间数据传输对象，表示特定环境和集群下的命名空间及其配置项
+      properties:
+        dataChangeCreatedBy:
+          type: string
+          description: 命名空间创建者用户名，记录是谁创建了这个命名空间实例
+          example: namespace-creator
+        dataChangeLastModifiedBy:
+          type: string
+          description: 命名空间最后修改者用户名，记录最后一次修改命名空间的用户
+          example: config-editor
+        dataChangeCreatedTime:
+          type: string
+          description: 命名空间创建时间，ISO 8601格式的时间戳
+          example: 2024-01-15T10:30:00.000+0800
+        dataChangeLastModifiedTime:
+          type: string
+          description: 命名空间最后修改时间，ISO 8601格式的时间戳
+          example: 2024-01-20T14:25:30.000+0800
+        appId:
+          type: string
+          description: 所属应用的唯一标识符
+          example: user-management-service
+        clusterName:
+          type: string
+          description: 所属集群的名称
+          example: default
+        namespaceName:
+          type: string
+          description: 命名空间名称，标识配置的分组
+          example: application
+        comment:
+          type: string
+          description: 命名空间备注说明，描述命名空间的用途
+          example: 应用主配置命名空间，包含核心业务配置
+        format:
+          type: string
+          description: 命名空间格式类型，如properties、xml、json、yml等
+          example: properties
+        isPublic:
+          type: boolean
+          description: 是否为公共命名空间，公共命名空间可以被其他应用关联使用
+          example: false
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OpenItemDTO'
+            description: com.ctrip.framework.apollo.openapi.dto.OpenItemDTO
+          description: 命名空间包含的所有配置项列表
+    OpenNamespaceLockDTO:
+      type: object
+      description: Apollo命名空间锁状态数据传输对象，表示命名空间的锁定状态信息
+      properties:
+        namespaceName:
+          type: string
+          description: 命名空间名称，标识被锁定的命名空间
+          example: application
+        isLocked:
+          type: boolean
+          description: 命名空间是否被锁定，锁定状态下不允许修改配置
+          example: true
+        lockedBy:
+          type: string
+          description: 锁定操作者用户名，记录是谁锁定了这个命名空间
+          example: config-admin
+    OpenOrganizationDto:
+      type: object
+      description: Apollo组织信息数据传输对象，表示系统中的组织架构信息
+      required:
+        - orgId
+        - orgName
+      properties:
+        orgId:
+          type: string
+          description: 组织唯一标识符，用于在系统中唯一标识一个组织
+          example: tech-dept
+        orgName:
+          type: string
+          description: 组织名称，用于显示的友好名称
+          example: 技术部
+    OpenGrayReleaseRuleItemDTO:
+      type: object
+      description: Apollo灰度发布规则项数据传输对象，表示灰度发布的具体规则条件
+      properties:
+        clientAppId:
+          type: string
+          description: 客户端应用ID，指定哪个应用可以获取灰度配置
+          example: mobile-app
+        clientIpList:
+          type: array
+          items:
+            type: string
+          description: 客户端IP地址列表，指定哪些IP地址可以获取灰度配置
+          example:
+            - 192.168.1.100
+            - 192.168.1.101
+            - 10.0.0.50
+        clientLabelList:
+          type: array
+          items:
+            type: string
+          description: 客户端标签列表，通过标签来识别可以获取灰度配置的客户端
+          example:
+            - beta-user
+            - internal-test
+            - canary-group
+    OpenGrayReleaseRuleDTO:
+      type: object
+      description: Apollo灰度发布规则数据传输对象，表示完整的灰度发布规则配置
+      properties:
+        dataChangeCreatedBy:
+          type: string
+          description: 灰度规则创建者用户名，记录是谁创建了这个灰度发布规则
+          example: gray-release-admin
+        dataChangeLastModifiedBy:
+          type: string
+          description: 灰度规则最后修改者用户名，记录最后一次修改规则的用户
+          example: ops-manager
+        dataChangeCreatedTime:
+          type: string
+          description: 灰度规则创建时间，ISO 8601格式的时间戳
+          example: 2024-01-15T10:30:00.000+0800
+        dataChangeLastModifiedTime:
+          type: string
+          description: 灰度规则最后修改时间，ISO 8601格式的时间戳
+          example: 2024-01-20T14:25:30.000+0800
+        appId:
+          type: string
+          description: 所属应用的唯一标识符
+          example: user-management-service
+        clusterName:
+          type: string
+          description: 所属集群的名称
+          example: default
+        namespaceName:
+          type: string
+          description: 所属命名空间的名称
+          example: application
+        branchName:
+          type: string
+          description: 灰度分支名称，标识灰度发布的分支
+          example: gray-branch-20240120
+        ruleItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/OpenGrayReleaseRuleItemDTO'
+            description: com.ctrip.framework.apollo.openapi.dto.OpenGrayReleaseRuleItemDTO
+          description: 灰度发布规则项列表，包含具体的灰度规则条件
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: |
+        Apollo OpenAPI访问令牌，用于身份验证和权限控制。
+
+        **获取方式：**
+        1. 登录Apollo Portal管理界面
+        2. 进入"管理员工具" -> "开放平台授权管理"
+        3. 点击"创建Token"按钮
+        4. 填写Token名称和选择授权的应用
+        5. 创建成功后复制生成的Token值
+
+        **使用方法：**
+        在请求头中添加：`Authorization: your-token-value`
+
+        **注意事项：**
+        - Token具有特定的应用访问权限
+        - 请妥善保管Token，避免泄露
+        - Token可以在管理界面中禁用或删除
+servers: []
+security: []
